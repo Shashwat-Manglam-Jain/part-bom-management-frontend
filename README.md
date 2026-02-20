@@ -21,6 +21,7 @@ React frontend for managing parts, BOM relationships, and audit history.
 - Node.js 18+ (recommended)
 - pnpm
 - Backend API running (default: `http://localhost:3000`)
+- Backend now persists data in SQLite, so created records remain after restart.
 
 ## Run locally
 

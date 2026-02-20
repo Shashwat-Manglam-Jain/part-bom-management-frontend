@@ -26,9 +26,9 @@ function App() {
       <Paper
         sx={{
           width: '100%',
-          borderRadius:'0px',
+          borderRadius: 0,
           maxWidth: '100%',
-          height: '100vh',
+          height: '100dvh',
           minHeight: '100vh',
           boxSizing: 'border-box',
           display: 'flex',

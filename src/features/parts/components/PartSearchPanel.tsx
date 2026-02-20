@@ -109,6 +109,7 @@ export function PartSearchPanel({
                         size="small"
                         aria-label="Clear search"
                         onClick={() => onSearchInputChange('')}
+                        sx={{ p: 0.35 }}
                       >
                         <Icon baseClassName="material-symbols-rounded" sx={{ fontSize: 17 }}>
                           close

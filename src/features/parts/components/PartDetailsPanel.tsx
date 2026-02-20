@@ -56,10 +56,14 @@ export function PartDetailsPanel({
           ...sectionHeaderSx,
         }}
       >
-       <Typography variant="h6" style={{ paddingLeft: 10 }}>
-  Part Details
-</Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.4  }} style={{ paddingLeft: 10 ,paddingBottom:10}}>
+        <Typography variant="h6" sx={{ pl: 1.1 }}>
+          Part Details
+        </Typography>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mt: 0.4, pl: 1.1, pb: 1.1 }}
+        >
           {details
             ? toPartLabel(details)
             : 'Select a part from Search to inspect full details.'}
@@ -84,8 +88,8 @@ export function PartDetailsPanel({
             sx={{
               display: 'grid',
               gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
-              gap: 5,
-              padding:'10px'
+              gap: { xs: 1.2, md: 2.2 },
+              p: { xs: 0.75, md: 1 },
             }}
           >
             <Paper
@@ -127,8 +131,8 @@ export function PartDetailsPanel({
                 xs: 'repeat(2, minmax(0, 1fr))',
                 md: 'repeat(4, minmax(0, 1fr))',
               },
-              gap: 5,
-                padding:'10px'
+              gap: { xs: 1.1, md: 2 },
+              p: { xs: 0.75, md: 1 },
             }}
           >
             <Paper
@@ -181,8 +185,8 @@ export function PartDetailsPanel({
             sx={{
               display: 'grid',
               gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
-              gap: 5,
-                padding:'10px'
+              gap: { xs: 1.2, md: 2.2 },
+              p: { xs: 0.75, md: 1 },
             }}
           >
             <Paper variant="outlined" sx={{ ...subtleCardSx, p: 1.25 }}>

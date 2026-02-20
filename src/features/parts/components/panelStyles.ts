@@ -1,10 +1,10 @@
 import { alpha, type SxProps, type Theme } from '@mui/material/styles';
 
 export const panelSx: SxProps<Theme> = {
- padding:'30px',
- paddingBottom:'4rem',
+  p: { xs: 1.2, sm: 1.35, md: 1.6 },
+  pb: { xs: 2.2, md: 3 },
   borderRadius: 1,
-  marginTop:'10px',
+  mt: { xs: 0.7, md: 1 },
   border: '1px solid',
   borderColor: (theme) => alpha(theme.palette.primary.main, 0.16),
   boxShadow: (theme) =>

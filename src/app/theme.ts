@@ -1,4 +1,4 @@
-import { createTheme } from '@mui/material/styles';
+import { alpha, createTheme } from '@mui/material/styles';
 
 export type ThemePresetId =
   | 'emerald';
@@ -86,6 +86,25 @@ export function createAppTheme(
       borderRadius: 10,
     },
     components: {
+      MuiCssBaseline: {
+        styleOverrides: {
+          html: {
+            WebkitTextSizeAdjust: '100%',
+          },
+          'input, textarea, select, button': {
+            font: 'inherit',
+          },
+          'input[type="number"]': {
+            appearance: 'textfield',
+            MozAppearance: 'textfield',
+          },
+          'input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button':
+            {
+              WebkitAppearance: 'none',
+              margin: 0,
+            },
+        },
+      },
       MuiPaper: {
         defaultProps: {
           elevation: 0,
@@ -129,6 +148,37 @@ export function createAppTheme(
       MuiTextField: {
         defaultProps: {
           size: 'small',
+          variant: 'outlined',
+        },
+      },
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: ({ theme }) => ({
+            borderRadius: 8,
+            backgroundColor: alpha(theme.palette.background.paper, 0.92),
+            '&.MuiInputBase-sizeSmall:not(.MuiInputBase-multiline)': {
+              minHeight: 40,
+            },
+            '& .MuiInputAdornment-root': {
+              marginTop: 0,
+              marginBottom: 0,
+            },
+          }),
+          input: {
+            fontSize: '0.95rem',
+          },
+          inputSizeSmall: {
+            lineHeight: 1.4,
+          },
+        },
+      },
+      MuiFormHelperText: {
+        styleOverrides: {
+          root: {
+            marginLeft: 0,
+            marginRight: 0,
+            lineHeight: 1.35,
+          },
         },
       },
       MuiChip: {

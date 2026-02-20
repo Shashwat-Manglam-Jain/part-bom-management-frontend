@@ -15,6 +15,8 @@ import { usePartsPageState } from './hooks/usePartsPageState';
 
 export function PartsPage() {
   const state = usePartsPageState();
+  const setSearchInput = state.setSearchInput;
+  const selectPart = state.selectPart;
   const [activeView, setActiveView] = useState<PartsViewMode>('details');
   const [showSelectorPage, setShowSelectorPage] = useState(false);
   const currentWorkspaceLabel = showSelectorPage
@@ -37,8 +39,8 @@ export function PartsPage() {
           : 'history';
 
   const clearSearchInput = useCallback(() => {
-    state.setSearchInput('');
-  }, [state.setSearchInput]);
+    setSearchInput('');
+  }, [setSearchInput]);
 
   const handleOpenPartSelector = useCallback(() => {
     setShowSelectorPage(true);
@@ -74,7 +76,7 @@ export function PartsPage() {
 
   const handleSelectPartFromSelector = (partId: string) => {
     clearSearchInput();
-    state.selectPart(partId);
+    selectPart(partId);
     setActiveView('details');
     setShowSelectorPage(false);
   };
@@ -130,17 +132,15 @@ export function PartsPage() {
       >
         <Box
           sx={{
-            px: 0.95,
-            py: 0.9,
+            px: { xs: 1, md: 1.2 },
+            py: { xs: 0.9, md: 1 },
             display: 'flex',
-            paddingX:'20px',
-         marginTop:'10px',
+            mt: { xs: 0.6, md: 1 },
             alignItems: { xs: 'flex-start', sm: 'center' },
             flexDirection: { xs: 'column', sm: 'row' },
             justifyContent: 'space-between',
             gap: 0.9,
-            paddingBottom:'15px',
-            borderRadius:'5px',
+            borderRadius: 1.2,
             border: '1px solid',
             borderColor: (theme) => alpha(theme.palette.primary.main, 0.24),
             background: (theme) =>
@@ -173,8 +173,8 @@ export function PartsPage() {
             sx={{
               maxWidth: { xs: '100%', sm: 390 },
               alignSelf: { xs: 'stretch', sm: 'center' }
-              ,borderRadius:'5px',
-              padding:'15px',
+              ,borderRadius: 1,
+              py: 0.35,
               width: { xs: '100%', sm: 'auto' },
               '& .MuiChip-label': {
                 overflow: 'hidden',
@@ -197,7 +197,7 @@ export function PartsPage() {
               mode="workspace"
               onBackToWorkspace={handleClosePartSelector}
               searchInput={state.search.input}
-              onSearchInputChange={state.setSearchInput}
+              onSearchInputChange={setSearchInput}
               searchLoading={state.search.loading}
               searchError={state.search.error}
               parts={state.search.parts}

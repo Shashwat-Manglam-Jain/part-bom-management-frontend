@@ -496,7 +496,7 @@ export function BomPanel({
                   }}
                   error={Boolean(createErrors.quantity)}
                   helperText={createErrors.quantity ?? 'Positive integer'}
-                  inputProps={{ min: 1, step: 1 }}
+                  inputProps={{ min: 1, step: 1, inputMode: 'numeric', pattern: '[0-9]*' }}
                   disabled={mutationLoading}
                   sx={{
                     width: { xs: '100%', sm: 130 },
@@ -624,7 +624,7 @@ export function BomPanel({
                             }}
                             error={Boolean(editErrors[childPart.id])}
                             helperText={editErrors[childPart.id]}
-                            inputProps={{ min: 1, step: 1 }}
+                            inputProps={{ min: 1, step: 1, inputMode: 'numeric', pattern: '[0-9]*' }}
                             disabled={mutationLoading}
                             sx={{ width: { xs: '100%', sm: 130 }, flexShrink: 0 }}
                           />
