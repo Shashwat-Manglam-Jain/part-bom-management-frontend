@@ -241,14 +241,14 @@ export function usePartsPageState(): PartsPageState {
 
       if (searchInput.trim()) {
         const latestSearchResults = await searchParts(searchInput);
-        applySearchResults(latestSearchResults);
+        setParts(latestSearchResults);
       } else {
-        applySearchResults(latestAllParts);
+        setParts(latestAllParts);
       }
     } catch {
       // Keep current list state when silent refresh fails.
     }
-  }, [applySearchResults, searchInput]);
+  }, [searchInput]);
 
   useEffect(() => {
     if (!selectedPartId) {
@@ -275,7 +275,7 @@ export function usePartsPageState(): PartsPageState {
       const [detailsResult, auditResult, bomResult] = await Promise.allSettled([
         getPartDetails(selectedPartId),
         getPartAuditLogs(selectedPartId),
-        getBomTree(selectedPartId, 1),
+        getBomTree(selectedPartId, 2),
       ]);
 
       if (ignoreResponse) {
@@ -299,7 +299,7 @@ export function usePartsPageState(): PartsPageState {
       setAuditLoading(false);
 
       if (bomResult.status === 'fulfilled') {
-        const nodes = normalizeBomTree(bomResult.value.tree, 1);
+        const nodes = normalizeBomTree(bomResult.value.tree, 2);
         setBomRootId(bomResult.value.tree.part.id);
         setBomNodes(nodes);
         setExpandedNodeIds(new Set([bomResult.value.tree.part.id]));
@@ -408,14 +408,6 @@ export function usePartsPageState(): PartsPageState {
         childParts: [],
       });
       setDetailsError(null);
-
-      try {
-        const results = await searchParts('');
-        setAllParts(results);
-        setParts(results);
-      } catch {
-        // Keep optimistic state when follow-up refresh fails.
-      }
     } catch (error) {
       const message = getErrorMessage(error);
       setCreatePartError(message);
@@ -444,14 +436,6 @@ export function usePartsPageState(): PartsPageState {
 
       setAllParts((current) => upsertPartSummary(current, createdSummary));
       setParts((current) => upsertPartSummary(current, createdSummary));
-
-      try {
-        const results = await searchParts('');
-        setAllParts(results);
-        setParts(results);
-      } catch {
-        // Keep optimistic state when follow-up refresh fails.
-      }
 
       return {
         id: createdPart.id,
@@ -512,7 +496,7 @@ export function usePartsPageState(): PartsPageState {
     const [detailsResult, auditResult, bomResult] = await Promise.allSettled([
       getPartDetails(currentSelectedPartId),
       getPartAuditLogs(currentSelectedPartId),
-      getBomTree(currentSelectedPartId, 1),
+      getBomTree(currentSelectedPartId, 2),
     ]);
 
     if (selectedPartIdRef.current !== currentSelectedPartId) {
@@ -520,14 +504,19 @@ export function usePartsPageState(): PartsPageState {
     }
 
     if (detailsResult.status === 'fulfilled') {
+      const updatedSummary: PartSummary = {
+        id: detailsResult.value.id,
+        partNumber: detailsResult.value.partNumber,
+        name: detailsResult.value.name,
+      };
+
       setPartDetails(detailsResult.value);
       setDetailsError(null);
-      setAllParts((current) =>
-        upsertPartSummary(current, {
-          id: detailsResult.value.id,
-          partNumber: detailsResult.value.partNumber,
-          name: detailsResult.value.name,
-        }),
+      setAllParts((current) => upsertPartSummary(current, updatedSummary));
+      setParts((current) =>
+        current.some((part) => part.id === updatedSummary.id)
+          ? upsertPartSummary(current, updatedSummary)
+          : current,
       );
     } else {
       if (!isSilentRefresh) {
@@ -551,10 +540,16 @@ export function usePartsPageState(): PartsPageState {
     }
 
     if (bomResult.status === 'fulfilled') {
-      const nodes = normalizeBomTree(bomResult.value.tree, 1);
-      setBomRootId(bomResult.value.tree.part.id);
-      setBomNodes(nodes);
-      setExpandedNodeIds(new Set([bomResult.value.tree.part.id]));
+      const nextRootId = bomResult.value.tree.part.id;
+      const incomingNodes = normalizeBomTree(bomResult.value.tree, 2);
+
+      setBomRootId(nextRootId);
+      setBomNodes((current) => mergeBomNodes(current, incomingNodes));
+      setExpandedNodeIds((current) => {
+        const next = new Set(current);
+        next.add(nextRootId);
+        return next;
+      });
       setBomError(null);
     } else {
       if (!isSilentRefresh) {
@@ -564,75 +559,7 @@ export function usePartsPageState(): PartsPageState {
     if (!isSilentRefresh) {
       setBomLoading(false);
     }
-
-    try {
-      const latestAllParts = await searchParts('');
-      if (selectedPartIdRef.current !== currentSelectedPartId) {
-        return;
-      }
-
-      setAllParts(latestAllParts);
-
-      if (searchInput.trim()) {
-        const latestSearchResults = await searchParts(searchInput);
-        if (selectedPartIdRef.current !== currentSelectedPartId) {
-          return;
-        }
-
-        setParts(latestSearchResults);
-      } else {
-        setParts(latestAllParts);
-      }
-    } catch {
-      // Keep current UI state when part catalog refresh fails.
-    }
-  }, [searchInput]);
-
-  useEffect(() => {
-    if (!selectedPartId) {
-      return;
-    }
-
-    const intervalId = window.setInterval(() => {
-      if (
-        document.visibilityState !== 'visible' ||
-        createPartLoading ||
-        bomMutationLoading
-      ) {
-        return;
-      }
-
-      void onRefreshSelected({ silent: true });
-    }, 6000);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, [selectedPartId, onRefreshSelected, createPartLoading, bomMutationLoading]);
-
-  useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      if (
-        document.visibilityState !== 'visible' ||
-        searchLoading ||
-        createPartLoading ||
-        bomMutationLoading
-      ) {
-        return;
-      }
-
-      void refreshCatalogSilently();
-    }, 7000);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, [
-    refreshCatalogSilently,
-    searchLoading,
-    createPartLoading,
-    bomMutationLoading,
-  ]);
+  }, []);
 
   useEffect(() => {
     const refreshOnFocus = () => {

@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import CircularProgress from '@mui/material/CircularProgress';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -10,6 +9,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Divider from '@mui/material/Divider';
 import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
+import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
@@ -122,6 +122,7 @@ export function BomPanel({
   );
 
   const actionError = mutationError ?? localActionError;
+  const hasBomTreeRoot = Boolean(rootId && nodes[rootId]);
 
   const resetNewPartDialog = () => {
     setNewPartName('');
@@ -291,22 +292,71 @@ export function BomPanel({
       </Typography>
       <Divider sx={{ my: 1.25 }} />
 
-      {loading ? (
-        <Stack direction="row" spacing={1} alignItems="center">
-          <CircularProgress size={16} />
-          <Typography variant="body2" color="text.secondary">
-            Loading BOM tree...
-          </Typography>
-        </Stack>
-      ) : null}
       {error ? <Alert severity="error" sx={{ mt: 1 }}>{error}</Alert> : null}
 
-      {!loading && !error && rootId ? (
+      {!error && rootId ? (
         <Box
-          component="ul"
           sx={{
-            listStyle: 'none',
-            m: 0,
+            position: 'relative',
+          }}
+        >
+          <Box
+            component="ul"
+            sx={{
+              listStyle: 'none',
+              m: 0,
+              p: 1.25,
+              borderRadius: 2,
+              border: '1px solid',
+              borderColor: (theme) => alpha(theme.palette.primary.main, 0.18),
+              backgroundColor: (theme) => alpha(theme.palette.primary.light, 0.24),
+              opacity: loading ? 0.55 : 1,
+              transition: 'opacity 120ms ease',
+            }}
+          >
+            {hasBomTreeRoot ? (
+              <BomNodeItem
+                nodeId={rootId}
+                level={0}
+                nodes={nodes}
+                expandedNodeIds={expandedNodeIds}
+                onToggle={onToggleNode}
+                onRetry={onRetryChildren}
+              />
+            ) : (
+              <Box component="li" sx={{ listStyle: 'none' }}>
+                <Stack spacing={0.85}>
+                  <Skeleton variant="rounded" height={28} width="58%" />
+                  <Skeleton variant="rounded" height={22} width="82%" />
+                  <Skeleton variant="rounded" height={22} width="74%" />
+                </Stack>
+              </Box>
+            )}
+          </Box>
+
+          {loading ? (
+            <Box
+              sx={{
+                position: 'absolute',
+                inset: 0,
+                p: 1.25,
+                pointerEvents: 'none',
+              }}
+            >
+              <Stack spacing={0.85}>
+                <Skeleton variant="rounded" height={28} width="58%" />
+                <Skeleton variant="rounded" height={22} width="82%" />
+                <Skeleton variant="rounded" height={22} width="74%" />
+                <Skeleton variant="rounded" height={22} width="66%" />
+              </Stack>
+            </Box>
+          ) : null}
+        </Box>
+      ) : null}
+
+      {!error && !rootId && loading ? (
+        <Box
+          sx={{
             p: 1.25,
             borderRadius: 2,
             border: '1px solid',
@@ -314,14 +364,11 @@ export function BomPanel({
             backgroundColor: (theme) => alpha(theme.palette.primary.light, 0.24),
           }}
         >
-          <BomNodeItem
-            nodeId={rootId}
-            level={0}
-            nodes={nodes}
-            expandedNodeIds={expandedNodeIds}
-            onToggle={onToggleNode}
-            onRetry={onRetryChildren}
-          />
+          <Stack spacing={0.85}>
+            <Skeleton variant="rounded" height={28} width="56%" />
+            <Skeleton variant="rounded" height={22} width="88%" />
+            <Skeleton variant="rounded" height={22} width="80%" />
+          </Stack>
         </Box>
       ) : null}
 

@@ -44,13 +44,7 @@ export async function request<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const method = (options.method ?? 'GET').toUpperCase();
-  const url = new URL(`${API_BASE_URL}${path}`);
-
-  // Avoid stale GET responses from intermediary/browser caching in deployed environments.
-  if (method === 'GET' && !url.searchParams.has('_ts')) {
-    url.searchParams.set('_ts', Date.now().toString());
-  }
+  const url = `${API_BASE_URL}${path}`;
 
   const headers = new Headers(options.headers ?? {});
   const hasBody = options.body !== undefined && options.body !== null;
@@ -61,10 +55,10 @@ export async function request<T>(
 
   let response: Response;
   try {
-    response = await fetch(url.toString(), {
+    response = await fetch(url, {
       ...options,
       headers,
-      cache: options.cache ?? 'no-store',
+      cache: options.cache ?? 'no-cache',
     });
   } catch {
     throw new Error(

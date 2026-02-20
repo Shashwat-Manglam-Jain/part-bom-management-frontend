@@ -33,9 +33,18 @@ export function mergeBomNodes(
 
   for (const [nodeId, incomingNode] of Object.entries(incoming)) {
     const existingNode = next[nodeId];
+    const preserveLoadedChildren =
+      Boolean(existingNode?.childrenLoaded) && !incomingNode.childrenLoaded;
+
     next[nodeId] = {
       ...existingNode,
       ...incomingNode,
+      childIds: preserveLoadedChildren
+        ? existingNode?.childIds ?? incomingNode.childIds
+        : incomingNode.childIds,
+      childrenLoaded: preserveLoadedChildren
+        ? true
+        : incomingNode.childrenLoaded,
       quantityFromParent:
         incomingNode.quantityFromParent ?? existingNode?.quantityFromParent,
       childrenError: undefined,
