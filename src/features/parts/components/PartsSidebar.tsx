@@ -71,12 +71,15 @@ export function PartsSidebar({
         display: 'flex',
         flexDirection: 'column',
         p: { xs: 1.3, md: 1.55 },
+        borderRadius:'10px',
+        marginBottom:'20px'
       }}
     >
       <Box
         sx={{
           p: 1.1,
-          borderRadius: 2,
+          borderRadius: 0.5,
+          paddingX:'15px',
           border: '1px solid',
           borderColor: (theme) => alpha(theme.palette.primary.main, 0.25),
           background: (theme) =>
@@ -115,7 +118,7 @@ export function PartsSidebar({
                 width: '100%',
                 justifyContent: 'flex-start',
                 textAlign: 'left',
-                borderRadius: 2,
+                borderRadius: 1,
                 py: 0.95,
                 px: 1.15,
                 border: '1px solid',

@@ -56,8 +56,10 @@ export function PartDetailsPanel({
           ...sectionHeaderSx,
         }}
       >
-        <Typography variant="h6">Part Details</Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.3 }}>
+       <Typography variant="h6" style={{ paddingLeft: 10 }}>
+  Part Details
+</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.4  }} style={{ paddingLeft: 10 ,paddingBottom:10}}>
           {details
             ? toPartLabel(details)
             : 'Select a part from Search to inspect full details.'}
@@ -82,7 +84,8 @@ export function PartDetailsPanel({
             sx={{
               display: 'grid',
               gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
-              gap: 1,
+              gap: 5,
+              padding:'10px'
             }}
           >
             <Paper
@@ -124,7 +127,8 @@ export function PartDetailsPanel({
                 xs: 'repeat(2, minmax(0, 1fr))',
                 md: 'repeat(4, minmax(0, 1fr))',
               },
-              gap: 1,
+              gap: 5,
+                padding:'10px'
             }}
           >
             <Paper
@@ -177,7 +181,8 @@ export function PartDetailsPanel({
             sx={{
               display: 'grid',
               gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
-              gap: 1,
+              gap: 5,
+                padding:'10px'
             }}
           >
             <Paper variant="outlined" sx={{ ...subtleCardSx, p: 1.25 }}>
@@ -232,7 +237,7 @@ export function PartDetailsPanel({
                       justifyContent="space-between"
                       sx={{
                         p: 0.9,
-                        borderRadius: 1.5,
+                        borderRadius: 0.5,
                         border: '1px solid',
                         borderColor: 'divider',
                         backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.9),

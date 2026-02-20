@@ -1,12 +1,7 @@
 import { createTheme } from '@mui/material/styles';
 
 export type ThemePresetId =
-  | 'pink'
-  | 'teal'
-  | 'indigo'
-  | 'emerald'
-  | 'amber'
-  | 'slate';
+  | 'emerald';
 
 interface ThemePreset {
   id: ThemePresetId;
@@ -20,42 +15,9 @@ interface ThemePreset {
   backgroundPaper: string;
 }
 
-export const DEFAULT_THEME_PRESET_ID: ThemePresetId = 'slate';
+export const DEFAULT_THEME_PRESET_ID: ThemePresetId = 'emerald';
 
 export const THEME_PRESETS: ThemePreset[] = [
-  {
-    id: 'pink',
-    label: 'Rose Orchid',
-    primaryMain: '#c23b7a',
-    primaryDark: '#9f2f63',
-    primaryLight: '#ffd9ea',
-    secondaryMain: '#6a2b50',
-    divider: '#efcfe0',
-    backgroundDefault: '#fff7fb',
-    backgroundPaper: '#ffffff',
-  },
-  {
-    id: 'teal',
-    label: 'Teal Ocean',
-    primaryMain: '#0f766e',
-    primaryDark: '#0b5f59',
-    primaryLight: '#d6efec',
-    secondaryMain: '#334155',
-    divider: '#d7e0e7',
-    backgroundDefault: '#f3f6f8',
-    backgroundPaper: '#ffffff',
-  },
-  {
-    id: 'indigo',
-    label: 'Purple Aura',
-    primaryMain: '#7c3aed',
-    primaryDark: '#5b21b6',
-    primaryLight: '#ddd6fe',
-    secondaryMain: '#3f2a74',
-    divider: '#d8cef6',
-    backgroundDefault: '#f7f3ff',
-    backgroundPaper: '#ffffff',
-  },
   {
     id: 'emerald',
     label: 'Emerald Leaf',
@@ -65,28 +27,6 @@ export const THEME_PRESETS: ThemePreset[] = [
     secondaryMain: '#294a44',
     divider: '#cfe9df',
     backgroundDefault: '#f4fbf8',
-    backgroundPaper: '#ffffff',
-  },
-  {
-    id: 'amber',
-    label: 'Amber Field',
-    primaryMain: '#d97706',
-    primaryDark: '#b45309',
-    primaryLight: '#fde68a',
-    secondaryMain: '#4b3a1d',
-    divider: '#efe1c3',
-    backgroundDefault: '#fffbf2',
-    backgroundPaper: '#ffffff',
-  },
-  {
-    id: 'slate',
-    label: 'Executive Slate',
-    primaryMain: '#334e68',
-    primaryDark: '#243b53',
-    primaryLight: '#d9e2ec',
-    secondaryMain: '#102a43',
-    divider: '#c7d3e0',
-    backgroundDefault: '#f4f7fb',
     backgroundPaper: '#ffffff',
   },
 ];

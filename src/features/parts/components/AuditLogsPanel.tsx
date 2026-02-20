@@ -7,7 +7,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import type { AuditLog } from '../../../shared/types/partBom';
 import { formatDateTime } from '../../../shared/utils/date';
-import { panelSx, sectionHeaderSx, subtleCardSx } from './panelStyles';
+import { panelSx, subtleCardSx } from './panelStyles';
 
 interface AuditLogsPanelProps {
   logs: AuditLog[];
@@ -37,7 +37,7 @@ export function AuditLogsPanel({
 }: AuditLogsPanelProps) {
   return (
     <Paper elevation={0} sx={panelSx}>
-      <Stack sx={sectionHeaderSx}>
+      <Stack >
         <Typography variant="h6">Audit Logs</Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.3 }}>
           Recent changes for the selected part.

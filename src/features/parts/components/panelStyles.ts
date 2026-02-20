@@ -1,8 +1,10 @@
 import { alpha, type SxProps, type Theme } from '@mui/material/styles';
 
 export const panelSx: SxProps<Theme> = {
-  p: { xs: 1.35, sm: 1.85 },
-  borderRadius: 3,
+ padding:'30px',
+ paddingBottom:'4rem',
+  borderRadius: 1,
+  marginTop:'10px',
   border: '1px solid',
   borderColor: (theme) => alpha(theme.palette.primary.main, 0.16),
   boxShadow: (theme) =>
@@ -14,7 +16,7 @@ export const panelSx: SxProps<Theme> = {
 export const sectionHeaderSx: SxProps<Theme> = (theme) => ({
   px: 1.2,
   py: 1.05,
-  borderRadius: 2,
+  borderRadius: 1,
   border: '1px solid',
   borderColor: alpha(theme.palette.primary.main, 0.24),
   background: `linear-gradient(180deg, ${alpha(theme.palette.primary.main, 0.16)} 0%, ${alpha(theme.palette.primary.main, 0.06)} 100%)`,
@@ -22,7 +24,7 @@ export const sectionHeaderSx: SxProps<Theme> = (theme) => ({
 
 export const subtleCardSx: SxProps<Theme> = {
   p: 1.05,
-  borderRadius: 2,
+  borderRadius: 1,
   border: '1px solid',
   borderColor: (theme) => alpha(theme.palette.primary.main, 0.14),
   backgroundColor: (theme) => alpha(theme.palette.primary.light, 0.24),

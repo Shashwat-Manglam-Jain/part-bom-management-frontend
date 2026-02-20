@@ -1,73 +1,83 @@
-# React + TypeScript + Vite
+# Frontend - Part BOM Management UI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React frontend for managing parts, BOM relationships, and audit history.
 
-Currently, two official plugins are available:
+## What this frontend does
+- Search parts by name or part number.
+- Select a part from search and open **Part Details**.
+- Create parts with client-side validation.
+- Manage BOM links (create, update quantity, delete).
+- View audit logs for the selected part.
+- Uses a single theme preset: **Emerald Leaf**.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Tech stack
+- React 19
+- TypeScript
+- Vite
+- MUI
+- Yup (form validation)
 
-## React Compiler
+## Prerequisites
+- Node.js 18+ (recommended)
+- pnpm
+- Backend API running (default: `http://localhost:3000`)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Run locally
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 1) Install dependencies
+```bash
+pnpm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 2) Start frontend
+```bash
+pnpm run dev
 ```
+
+### 3) Open app
+- `http://localhost:5173`
+
+## Environment variable
+- `VITE_API_BASE_URL` (optional)
+  - Default: `http://localhost:3000`
+  - Used by `src/shared/api/httpClient.ts`
+
+## Available scripts
+- `pnpm run dev` - start Vite dev server
+- `pnpm run build` - type-check + production build
+- `pnpm run preview` - preview production build locally
+- `pnpm run lint` - run ESLint
+
+## UI modules
+- **Part Details**: selected part metadata + parent/child relationships.
+- **BOM Manager**: expand BOM tree and manage child links with quantity.
+- **Audit Logs**: timeline of part and BOM actions.
+- **Create Part**: create new parts and refresh selection.
+- **Part Search**: search with clear icon and quick selection.
+
+## Validation rules (frontend)
+- Create part:
+  - `name` required, max 80 chars
+  - `partNumber` max 40 chars
+  - `description` max 240 chars
+- BOM link quantity:
+  - required, number, integer, minimum 1
+
+## API routes used by frontend
+- `GET /parts`
+- `POST /parts`
+- `GET /parts/:partId`
+- `GET /parts/:partId/audit-logs`
+- `GET /bom/:rootPartId`
+- `POST /bom/links`
+- `PUT /bom/links`
+- `DELETE /bom/links/:parentId/:childId`
+
+## Folder pointers
+- `src/features/parts/` - feature UI, hooks, validation
+- `src/shared/api/` - API client functions
+- `src/shared/types/` - shared TypeScript models
+- `src/app/theme.ts` - MUI theme setup (Emerald Leaf)
+
+## Quick explanation
+"This frontend is a dashboard for part and BOM operations. Users can search or create parts, inspect details, manage BOM links, and track audit history. It talks to a NestJS backend through REST APIs and keeps the workflow in a single workspace."

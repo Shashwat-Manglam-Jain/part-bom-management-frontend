@@ -24,6 +24,7 @@ export function PartDetailsHeader({
         flexDirection: { xs: 'column', sm: 'row' },
         justifyContent: 'space-between',
         gap: 1.5,
+     
       }}
     >
       <Box>

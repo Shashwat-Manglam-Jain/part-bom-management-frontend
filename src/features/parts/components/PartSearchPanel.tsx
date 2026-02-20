@@ -3,6 +3,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Icon from '@mui/material/Icon';
+import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -40,6 +41,7 @@ export function PartSearchPanel({
 }: PartSearchPanelProps) {
   const isBusy = searchLoading;
   const isWorkspaceMode = mode === 'workspace';
+  const hasSearchInput = searchInput.length > 0;
 
   return (
     <Paper elevation={0} sx={{ ...panelSx, overflow: 'hidden' }}>
@@ -57,7 +59,7 @@ export function PartSearchPanel({
           <Box>
             <Typography variant="h6">Part Search</Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
-              Select a part to return to your current workspace.
+              Select a part to open Part Details.
             </Typography>
           </Box>
           {onBackToWorkspace ? (
@@ -98,9 +100,22 @@ export function PartSearchPanel({
                   </Icon>
                 </InputAdornment>
               ),
-              endAdornment: isBusy ? (
+              endAdornment: isBusy || hasSearchInput ? (
                 <InputAdornment position="end">
-                  <CircularProgress size={14} />
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
+                    {isBusy ? <CircularProgress size={14} /> : null}
+                    {hasSearchInput ? (
+                      <IconButton
+                        size="small"
+                        aria-label="Clear search"
+                        onClick={() => onSearchInputChange('')}
+                      >
+                        <Icon baseClassName="material-symbols-rounded" sx={{ fontSize: 17 }}>
+                          close
+                        </Icon>
+                      </IconButton>
+                    ) : null}
+                  </Box>
                 </InputAdornment>
               ) : undefined,
             },

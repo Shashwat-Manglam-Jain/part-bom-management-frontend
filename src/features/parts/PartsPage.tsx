@@ -75,6 +75,7 @@ export function PartsPage() {
   const handleSelectPartFromSelector = (partId: string) => {
     clearSearchInput();
     state.selectPart(partId);
+    setActiveView('details');
     setShowSelectorPage(false);
   };
 
@@ -83,11 +84,13 @@ export function PartsPage() {
       component="section"
       sx={{
         width: '100%',
+        height: { xs: 'auto', lg: '100%' },
         minHeight: 0,
         display: 'grid',
         gridTemplateColumns: { xs: '1fr', lg: '320px minmax(0, 1fr)' },
         gap: { xs: 1.25, md: 1.75 },
         alignItems: 'stretch',
+        overflow: { xs: 'visible', lg: 'hidden' },
       }}
     >
       <Box
@@ -97,6 +100,10 @@ export function PartsPage() {
           minWidth: 0,
           minHeight: 0,
           alignContent: 'start',
+          alignSelf: { xs: 'stretch', lg: 'start' },
+          position: { xs: 'static', lg: 'sticky' },
+          top: { lg: 0 },
+          zIndex: { lg: 1 },
         }}
       >
         <PartsSidebar
@@ -118,6 +125,7 @@ export function PartsPage() {
           gap: 1.15,
           minWidth: 0,
           minHeight: 0,
+          overflow: { xs: 'visible', lg: 'hidden' },
         }}
       >
         <Box
@@ -125,11 +133,14 @@ export function PartsPage() {
             px: 0.95,
             py: 0.9,
             display: 'flex',
+            paddingX:'20px',
+         marginTop:'10px',
             alignItems: { xs: 'flex-start', sm: 'center' },
             flexDirection: { xs: 'column', sm: 'row' },
             justifyContent: 'space-between',
             gap: 0.9,
-            borderRadius: 2,
+            paddingBottom:'15px',
+            borderRadius:'5px',
             border: '1px solid',
             borderColor: (theme) => alpha(theme.palette.primary.main, 0.24),
             background: (theme) =>
@@ -140,7 +151,7 @@ export function PartsPage() {
             <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
               Current Workspace
             </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.55 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.55  }}>
               <Icon baseClassName="material-symbols-rounded" color="primary" sx={{ fontSize: 18 }}>
                 {currentWorkspaceIcon}
               </Icon>
@@ -161,7 +172,9 @@ export function PartsPage() {
             }
             sx={{
               maxWidth: { xs: '100%', sm: 390 },
-              alignSelf: { xs: 'stretch', sm: 'center' },
+              alignSelf: { xs: 'stretch', sm: 'center' }
+              ,borderRadius:'5px',
+              padding:'15px',
               width: { xs: '100%', sm: 'auto' },
               '& .MuiChip-label': {
                 overflow: 'hidden',
@@ -172,80 +185,88 @@ export function PartsPage() {
           />
         </Box>
 
-        {showSelectorPage ? (
-          <PartSearchPanel
-            mode="workspace"
-            onBackToWorkspace={handleClosePartSelector}
-            searchInput={state.search.input}
-            onSearchInputChange={state.setSearchInput}
-            searchLoading={state.search.loading}
-            searchError={state.search.error}
-            parts={state.search.parts}
-            selectedPartId={state.selectedPartId}
-            onSelectPart={handleSelectPartFromSelector}
-          />
-        ) : (
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: '1fr',
-              gap: 1,
-              minHeight: 0,
-              alignContent: 'start',
-            }}
-          >
-            {activeView === 'details' ? (
-              <PartDetailsPanel
-                details={state.details.data}
-                loading={state.details.loading}
-                error={state.details.error}
-              />
-            ) : null}
+        <Box
+          sx={{
+            minHeight: 0,
+            overflowY: { xs: 'visible', lg: 'auto' },
+            pr: { lg: 0.35 },
+          }}
+        >
+          {showSelectorPage ? (
+            <PartSearchPanel
+              mode="workspace"
+              onBackToWorkspace={handleClosePartSelector}
+              searchInput={state.search.input}
+              onSearchInputChange={state.setSearchInput}
+              searchLoading={state.search.loading}
+              searchError={state.search.error}
+              parts={state.search.parts}
+              selectedPartId={state.selectedPartId}
+              onSelectPart={handleSelectPartFromSelector}
+            />
+          ) : (
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: '1fr',
+                gap: 1,
+                minHeight: 0,
+                alignContent: 'start',
+              }}
+            >
+              {activeView === 'details' ? (
+                <PartDetailsPanel
+                  details={state.details.data}
+                  loading={state.details.loading}
+                  error={state.details.error}
+                />
+              ) : null}
 
-            {activeView === 'create' ? (
-              <CreatePartPanel
-                loading={state.search.createLoading}
-                error={state.search.createError}
-                onCreatePart={state.onCreatePart}
-                onClearError={state.clearCreatePartError}
-                onOpenSearch={handleOpenPartSelector}
-                onOpenDetails={() => {
-                  handleChangeView('details');
-                }}
-              />
-            ) : null}
+              {activeView === 'create' ? (
+                <CreatePartPanel
+                  loading={state.search.createLoading}
+                  error={state.search.createError}
+                  onCreatePart={state.onCreatePart}
+                  onClearError={state.clearCreatePartError}
+                  onOpenSearch={handleOpenPartSelector}
+                  onOpenDetails={() => {
+                    handleChangeView('details');
+                  }}
+                />
+              ) : null}
 
-            {activeView === 'bom' ? (
-              <BomPanel
-                key={state.bom.rootId ?? 'no-root'}
-                rootId={state.bom.rootId}
-                nodes={state.bom.nodes}
-                expandedNodeIds={state.bom.expandedNodeIds}
-                loading={state.bom.loading}
-                error={state.bom.error}
-                mutationLoading={state.bom.mutationLoading}
-                mutationError={state.bom.mutationError}
-                availableParts={state.allParts}
-                managedChildLinks={state.details.data?.childParts ?? []}
-                onToggleNode={state.onToggleNode}
-                onRetryChildren={state.onRetryChildren}
-                onCreateLink={state.onCreateBomLink}
-                onCreatePartForBom={state.onCreatePartForBom}
-                onUpdateLink={state.onUpdateBomLink}
-                onDeleteLink={state.onDeleteBomLink}
-                onClearMutationError={state.clearBomMutationError}
-              />
-            ) : null}
+              {activeView === 'bom' ? (
+                <BomPanel
+                  key={state.bom.rootId ?? 'no-root'}
+                  rootId={state.bom.rootId}
+                  nodes={state.bom.nodes}
+                  expandedNodeIds={state.bom.expandedNodeIds}
+                  loading={state.bom.loading}
+                  error={state.bom.error}
+                  mutationLoading={state.bom.mutationLoading}
+                  mutationError={state.bom.mutationError}
+                  availableParts={state.allParts}
+                  managedChildLinks={state.details.data?.childParts ?? []}
+                  onToggleNode={state.onToggleNode}
+                  onRetryChildren={state.onRetryChildren}
+                  onCreateLink={state.onCreateBomLink}
+                  onCreatePartForBom={state.onCreatePartForBom}
+                  onUpdateLink={state.onUpdateBomLink}
+                  onDeleteLink={state.onDeleteBomLink}
+                  onClearMutationError={state.clearBomMutationError}
+                />
+              ) : null}
 
-            {activeView === 'audit' ? (
-              <AuditLogsPanel
-                logs={state.audit.logs}
-                loading={state.audit.loading}
-                error={state.audit.error}
-              />
-            ) : null}
-          </Box>
-        )}
+              {activeView === 'audit' ? (
+                <AuditLogsPanel
+                  logs={state.audit.logs}
+                  loading={state.audit.loading}
+                  error={state.audit.error}
+                />
+              ) : null}
+            </Box>
+          )}
+        </Box>
       </Box>
     </Box>
   );
