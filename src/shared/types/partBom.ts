@@ -4,6 +4,12 @@ export interface PartSummary {
   name: string;
 }
 
+export interface PartRecord extends PartSummary {
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ChildPartUsage extends PartSummary {
   quantity: number;
 }

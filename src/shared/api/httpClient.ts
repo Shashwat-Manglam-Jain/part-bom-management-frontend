@@ -1,5 +1,23 @@
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ?? 'http://localhost:3000';
+function resolveApiBaseUrl(): string {
+  const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+  if (configuredBaseUrl) {
+    return configuredBaseUrl.replace(/\/$/, '');
+  }
+
+  if (typeof window !== 'undefined') {
+    const { hostname } = window.location;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return 'http://localhost:3000';
+    }
+
+    // Fallback for deployed frontend when env var is missing.
+    return 'https://part-bom-management-backend.vercel.app';
+  }
+
+  return 'http://localhost:3000';
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 interface ApiErrorBody {
   message?: string | string[];
@@ -26,25 +44,62 @@ export async function request<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers ?? {}),
-    },
-    ...options,
-  });
+  const method = (options.method ?? 'GET').toUpperCase();
+  const url = new URL(`${API_BASE_URL}${path}`);
+
+  // Avoid stale GET responses from intermediary/browser caching in deployed environments.
+  if (method === 'GET' && !url.searchParams.has('_ts')) {
+    url.searchParams.set('_ts', Date.now().toString());
+  }
+
+  const headers = new Headers(options.headers ?? {});
+  const hasBody = options.body !== undefined && options.body !== null;
+
+  if (hasBody && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(url.toString(), {
+      ...options,
+      headers,
+      cache: options.cache ?? 'no-store',
+    });
+  } catch {
+    throw new Error(
+      `Unable to reach API at ${API_BASE_URL}. Check backend deployment and VITE_API_BASE_URL.`,
+    );
+  }
 
   if (!response.ok) {
     let message = `Request failed with status ${response.status}.`;
 
     try {
-      const errorBody = (await response.json()) as ApiErrorBody;
-      message = toErrorMessage(errorBody, message);
+      const contentType = response.headers.get('content-type') ?? '';
+      if (contentType.includes('application/json')) {
+        const errorBody = (await response.json()) as ApiErrorBody;
+        message = toErrorMessage(errorBody, message);
+      } else {
+        const responseText = await response.text();
+        if (responseText.trim()) {
+          message = responseText;
+        }
+      }
     } catch {
       // Keep the fallback status-based message when body parsing fails.
     }
 
     throw new Error(message);
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  const contentType = response.headers.get('content-type') ?? '';
+  if (!contentType.includes('application/json')) {
+    return (await response.text()) as T;
   }
 
   return (await response.json()) as T;

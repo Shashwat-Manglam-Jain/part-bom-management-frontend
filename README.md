@@ -42,6 +42,8 @@ pnpm run dev
 - `VITE_API_BASE_URL` (optional)
   - Default: `http://localhost:3000`
   - Used by `src/shared/api/httpClient.ts`
+  - For Vercel frontend deployment, set it to:
+    - `https://part-bom-management-backend.vercel.app`
 
 ## Available scripts
 - `pnpm run dev` - start Vite dev server

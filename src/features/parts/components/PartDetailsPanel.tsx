@@ -235,9 +235,9 @@ export function PartDetailsPanel({
                   {details.childParts.map((child) => (
                     <Stack
                       key={child.id}
-                      direction="row"
+                      direction={{ xs: 'column', sm: 'row' }}
                       spacing={1}
-                      alignItems="center"
+                      alignItems={{ xs: 'flex-start', sm: 'center' }}
                       justifyContent="space-between"
                       sx={{
                         p: 0.9,
@@ -260,7 +260,7 @@ export function PartDetailsPanel({
                         color="primary"
                         variant="outlined"
                         label={`Qty ${child.quantity}`}
-                        sx={{ fontWeight: 700 }}
+                        sx={{ fontWeight: 700, alignSelf: { xs: 'flex-start', sm: 'center' } }}
                       />
                     </Stack>
                   ))}

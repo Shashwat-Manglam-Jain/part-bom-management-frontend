@@ -66,13 +66,14 @@ export function PartsSidebar({
       elevation={0}
       sx={{
         ...panelSx,
-        height: '100%',
+        height: { xs: 'auto', lg: '100%' },
         minHeight: 0,
         display: 'flex',
         flexDirection: 'column',
-        p: { xs: 1.3, md: 1.55 },
+        p: { xs: 1.05, sm: 1.3, md: 1.55 },
         borderRadius: 1.2,
-        mb: { xs: 1.2, md: 2 },
+        mb: { xs: 0.85, md: 2 },
+        overflow: 'hidden',
       }}
     >
       <Box
@@ -95,12 +96,25 @@ export function PartsSidebar({
         <Typography variant="h6" sx={{ mt: 0.2, color: 'text.primary' }}>
           Navigation
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mt: 0.25, display: { xs: 'none', sm: 'block' } }}
+        >
           Open one page at a time for a cleaner workflow.
         </Typography>
       </Box>
-      <Divider sx={{ my: 1.4 }} />
-      <Stack spacing={1.2} sx={{ mt: 1.4 }}>
+      <Divider sx={{ my: { xs: 1, sm: 1.4 } }} />
+      <Stack
+        spacing={1.2}
+        sx={{
+          mt: { xs: 0.7, sm: 1.4 },
+          flexDirection: 'column',
+          overflowX: 'visible',
+          pb: 0,
+          pr: 0,
+        }}
+      >
         {viewOptions.map((option) => {
           const isActive = !isSelectorPageOpen && activeView === option.id;
 
@@ -116,8 +130,10 @@ export function PartsSidebar({
               )}
               sx={{
                 width: '100%',
+                minWidth: 0,
                 justifyContent: 'flex-start',
                 textAlign: 'left',
+                minHeight: { xs: 42, sm: 0 },
                 borderRadius: 1,
                 py: 0.95,
                 px: 1.15,
@@ -147,7 +163,11 @@ export function PartsSidebar({
                 </Typography>
                 <Typography
                   variant="caption"
-                  sx={{ color: 'text.secondary', lineHeight: 1.45 }}
+                  sx={{
+                    color: 'text.secondary',
+                    lineHeight: 1.45,
+                    display: { xs: 'none', sm: 'block' },
+                  }}
                 >
                   {option.description}
                 </Typography>
@@ -157,10 +177,10 @@ export function PartsSidebar({
         })}
       </Stack>
 
-      <Divider sx={{ my: 2.4 }} />
+      <Divider sx={{ my: { xs: 1.5, sm: 2.4 } }} />
 
       <Typography variant="subtitle2">Quick Actions</Typography>
-      <Stack spacing={1.4} sx={{ mt: 1 }}>
+      <Stack spacing={1.1} sx={{ mt: 1 }}>
         <Button
           type="button"
           variant={isSelectorPageOpen ? 'contained' : 'outlined'}
@@ -169,6 +189,7 @@ export function PartsSidebar({
           }}
           sx={{
             width: '100%',
+            minWidth: 0,
             justifyContent: 'flex-start',
             color: isSelectorPageOpen ? 'common.white' : 'text.primary',
             borderColor: isSelectorPageOpen ? 'primary.main' : 'divider',
@@ -198,6 +219,7 @@ export function PartsSidebar({
           }}
           sx={{
             width: '100%',
+            minWidth: 0,
             justifyContent: 'flex-start',
             color:
               !isSelectorPageOpen && activeView === 'create'
@@ -226,43 +248,45 @@ export function PartsSidebar({
         </Button>
       </Stack>
 
-      <Divider sx={{ my: 2.9 }} />
+      <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+        <Divider sx={{ my: 2.4 }} />
 
-      <Typography variant="subtitle2">Selection Snapshot</Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.6 }}>
-        {selectedPart
-          ? `${selectedPart.partNumber} - ${selectedPart.name}`
-          : 'No part selected yet.'}
-      </Typography>
-      <Stack direction="row" spacing={1} sx={{ mt: 1.1 }}>
-        <Box
-          sx={{
-            ...subtleCardSx,
-            flex: 1,
-          }}
-        >
-          <Typography variant="caption" color="text.secondary">
-            Visible Parts
-          </Typography>
-          <Typography variant="body2" sx={{ fontWeight: 700 }}>
-            {partsCount}
-          </Typography>
-        </Box>
-        <Box
-          sx={{
-            ...subtleCardSx,
-            flex: 1,
-          }}
-        >
-          <Typography variant="caption" color="text.secondary">
-            Child Links
-          </Typography>
-          <Typography variant="body2" sx={{ fontWeight: 700 }}>
-            {selectedPartDetails?.childCount ?? 0}
-          </Typography>
-        </Box>
-      </Stack>
-      <Divider sx={{ my: 2.4 }} />
+        <Typography variant="subtitle2">Selection Snapshot</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.6 }}>
+          {selectedPart
+            ? `${selectedPart.partNumber} - ${selectedPart.name}`
+            : 'No part selected yet.'}
+        </Typography>
+        <Stack direction="row" spacing={1} sx={{ mt: 1.1 }}>
+          <Box
+            sx={{
+              ...subtleCardSx,
+              flex: 1,
+            }}
+          >
+            <Typography variant="caption" color="text.secondary">
+              Visible Parts
+            </Typography>
+            <Typography variant="body2" sx={{ fontWeight: 700 }}>
+              {partsCount}
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              ...subtleCardSx,
+              flex: 1,
+            }}
+          >
+            <Typography variant="caption" color="text.secondary">
+              Child Links
+            </Typography>
+            <Typography variant="body2" sx={{ fontWeight: 700 }}>
+              {selectedPartDetails?.childCount ?? 0}
+            </Typography>
+          </Box>
+        </Stack>
+        <Divider sx={{ my: 2.4 }} />
+      </Box>
     </Paper>
   );
 }

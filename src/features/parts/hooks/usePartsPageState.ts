@@ -11,6 +11,7 @@ import {
 } from '../../../shared/api/partBomApi';
 import type {
   AuditLog,
+  ChildPartUsage,
   PartDetails,
   PartSummary,
 } from '../../../shared/types/partBom';
@@ -47,6 +48,16 @@ interface BomState {
   error: string | null;
   mutationLoading: boolean;
   mutationError: string | null;
+}
+
+function upsertPartSummary(
+  currentParts: PartSummary[],
+  part: PartSummary,
+): PartSummary[] {
+  const withoutPart = currentParts.filter((item) => item.id !== part.id);
+  return [...withoutPart, part].sort((a, b) =>
+    a.partNumber.localeCompare(b.partNumber),
+  );
 }
 
 export interface PartsPageState {
@@ -88,6 +99,7 @@ export function usePartsPageState(): PartsPageState {
   const [createPartLoading, setCreatePartLoading] = useState(false);
   const [createPartError, setCreatePartError] = useState<string | null>(null);
   const hasMountedSearchInputEffect = useRef(false);
+  const selectedPartIdRef = useRef<string | null>(null);
 
   const [selectedPartId, setSelectedPartId] = useState<string | null>(null);
 
@@ -108,9 +120,46 @@ export function usePartsPageState(): PartsPageState {
   const [bomMutationError, setBomMutationError] = useState<string | null>(null);
 
   const selectedPart = useMemo(
-    () => parts.find((part) => part.id === selectedPartId) ?? null,
-    [parts, selectedPartId],
+    () => {
+      if (partDetails && partDetails.id === selectedPartId) {
+        return {
+          id: partDetails.id,
+          partNumber: partDetails.partNumber,
+          name: partDetails.name,
+        };
+      }
+
+      return (
+        parts.find((part) => part.id === selectedPartId) ??
+        allParts.find((part) => part.id === selectedPartId) ??
+        null
+      );
+    },
+    [allParts, partDetails, parts, selectedPartId],
   );
+
+  const applyLocalChildLinkUpdate = useCallback(
+    (updater: (currentChildren: ChildPartUsage[]) => ChildPartUsage[]) => {
+      setPartDetails((current) => {
+        if (!current) {
+          return current;
+        }
+
+        const nextChildren = updater(current.childParts);
+
+        return {
+          ...current,
+          childParts: nextChildren,
+          childCount: nextChildren.length,
+        };
+      });
+    },
+    [],
+  );
+
+  useEffect(() => {
+    selectedPartIdRef.current = selectedPartId;
+  }, [selectedPartId]);
 
   const applySearchResults = useCallback((nextParts: PartSummary[]) => {
     setParts(nextParts);
@@ -325,12 +374,32 @@ export function usePartsPageState(): PartsPageState {
 
     try {
       const createdPart = await createPart(payload);
-      const results = await searchParts('');
+      const createdSummary: PartSummary = {
+        id: createdPart.id,
+        partNumber: createdPart.partNumber,
+        name: createdPart.name,
+      };
 
-      setAllParts(results);
-      setParts(results);
+      setAllParts((current) => upsertPartSummary(current, createdSummary));
+      setParts((current) => upsertPartSummary(current, createdSummary));
       setSearchInput('');
       setSelectedPartId(createdPart.id);
+      setPartDetails({
+        ...createdPart,
+        parentCount: 0,
+        childCount: 0,
+        parentParts: [],
+        childParts: [],
+      });
+      setDetailsError(null);
+
+      try {
+        const results = await searchParts('');
+        setAllParts(results);
+        setParts(results);
+      } catch {
+        // Keep optimistic state when follow-up refresh fails.
+      }
     } catch (error) {
       const message = getErrorMessage(error);
       setCreatePartError(message);
@@ -351,10 +420,22 @@ export function usePartsPageState(): PartsPageState {
 
     try {
       const createdPart = await createPart(payload);
-      const results = await searchParts('');
+      const createdSummary: PartSummary = {
+        id: createdPart.id,
+        partNumber: createdPart.partNumber,
+        name: createdPart.name,
+      };
 
-      setAllParts(results);
-      setParts(results);
+      setAllParts((current) => upsertPartSummary(current, createdSummary));
+      setParts((current) => upsertPartSummary(current, createdSummary));
+
+      try {
+        const results = await searchParts('');
+        setAllParts(results);
+        setParts(results);
+      } catch {
+        // Keep optimistic state when follow-up refresh fails.
+      }
 
       return {
         id: createdPart.id,
@@ -397,37 +478,61 @@ export function usePartsPageState(): PartsPageState {
     void loadBomChildren(nodeId);
   };
 
-  const onRefreshSelected = async () => {
-    if (!selectedPartId) {
+  const onRefreshSelected = useCallback(async (options?: { silent?: boolean }) => {
+    const currentSelectedPartId = selectedPartIdRef.current;
+    if (!currentSelectedPartId) {
       return;
     }
 
-    setDetailsLoading(true);
-    setAuditLoading(true);
-    setBomLoading(true);
-    setBomMutationError(null);
+    const isSilentRefresh = options?.silent ?? false;
+
+    if (!isSilentRefresh) {
+      setDetailsLoading(true);
+      setAuditLoading(true);
+      setBomLoading(true);
+      setBomMutationError(null);
+    }
 
     const [detailsResult, auditResult, bomResult] = await Promise.allSettled([
-      getPartDetails(selectedPartId),
-      getPartAuditLogs(selectedPartId),
-      getBomTree(selectedPartId, 1),
+      getPartDetails(currentSelectedPartId),
+      getPartAuditLogs(currentSelectedPartId),
+      getBomTree(currentSelectedPartId, 1),
     ]);
+
+    if (selectedPartIdRef.current !== currentSelectedPartId) {
+      return;
+    }
 
     if (detailsResult.status === 'fulfilled') {
       setPartDetails(detailsResult.value);
       setDetailsError(null);
+      setAllParts((current) =>
+        upsertPartSummary(current, {
+          id: detailsResult.value.id,
+          partNumber: detailsResult.value.partNumber,
+          name: detailsResult.value.name,
+        }),
+      );
     } else {
-      setDetailsError(getErrorMessage(detailsResult.reason));
+      if (!isSilentRefresh) {
+        setDetailsError(getErrorMessage(detailsResult.reason));
+      }
     }
-    setDetailsLoading(false);
+    if (!isSilentRefresh) {
+      setDetailsLoading(false);
+    }
 
     if (auditResult.status === 'fulfilled') {
       setAuditLogs(auditResult.value);
       setAuditError(null);
     } else {
-      setAuditError(getErrorMessage(auditResult.reason));
+      if (!isSilentRefresh) {
+        setAuditError(getErrorMessage(auditResult.reason));
+      }
     }
-    setAuditLoading(false);
+    if (!isSilentRefresh) {
+      setAuditLoading(false);
+    }
 
     if (bomResult.status === 'fulfilled') {
       const nodes = normalizeBomTree(bomResult.value.tree, 1);
@@ -436,10 +541,78 @@ export function usePartsPageState(): PartsPageState {
       setExpandedNodeIds(new Set([bomResult.value.tree.part.id]));
       setBomError(null);
     } else {
-      setBomError(getErrorMessage(bomResult.reason));
+      if (!isSilentRefresh) {
+        setBomError(getErrorMessage(bomResult.reason));
+      }
     }
-    setBomLoading(false);
-  };
+    if (!isSilentRefresh) {
+      setBomLoading(false);
+    }
+
+    try {
+      const latestAllParts = await searchParts('');
+      if (selectedPartIdRef.current !== currentSelectedPartId) {
+        return;
+      }
+
+      setAllParts(latestAllParts);
+
+      if (searchInput.trim()) {
+        const latestSearchResults = await searchParts(searchInput);
+        if (selectedPartIdRef.current !== currentSelectedPartId) {
+          return;
+        }
+
+        setParts(latestSearchResults);
+      } else {
+        setParts(latestAllParts);
+      }
+    } catch {
+      // Keep current UI state when part catalog refresh fails.
+    }
+  }, [searchInput]);
+
+  useEffect(() => {
+    if (!selectedPartId) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      if (
+        document.visibilityState !== 'visible' ||
+        createPartLoading ||
+        bomMutationLoading
+      ) {
+        return;
+      }
+
+      void onRefreshSelected({ silent: true });
+    }, 6000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [selectedPartId, onRefreshSelected, createPartLoading, bomMutationLoading]);
+
+  useEffect(() => {
+    if (!selectedPartId) {
+      return;
+    }
+
+    const refreshOnFocus = () => {
+      if (document.visibilityState === 'visible') {
+        void onRefreshSelected({ silent: true });
+      }
+    };
+
+    window.addEventListener('focus', refreshOnFocus);
+    document.addEventListener('visibilitychange', refreshOnFocus);
+
+    return () => {
+      window.removeEventListener('focus', refreshOnFocus);
+      document.removeEventListener('visibilitychange', refreshOnFocus);
+    };
+  }, [selectedPartId, onRefreshSelected]);
 
   const onCreateBomLink = async (childId: string, quantity: number) => {
     if (!selectedPartId) {
@@ -455,6 +628,31 @@ export function usePartsPageState(): PartsPageState {
         childId,
         quantity,
       });
+      const linkedPart =
+        allParts.find((part) => part.id === childId) ??
+        parts.find((part) => part.id === childId);
+
+      if (linkedPart) {
+        applyLocalChildLinkUpdate((currentChildren) => {
+          const existingIndex = currentChildren.findIndex(
+            (child) => child.id === childId,
+          );
+
+          if (existingIndex >= 0) {
+            const nextChildren = [...currentChildren];
+            nextChildren[existingIndex] = {
+              ...nextChildren[existingIndex],
+              quantity,
+            };
+            return nextChildren;
+          }
+
+          return [...currentChildren, { ...linkedPart, quantity }].sort((a, b) =>
+            a.partNumber.localeCompare(b.partNumber),
+          );
+        });
+      }
+
       await onRefreshSelected();
     } catch (error) {
       const message = getErrorMessage(error);
@@ -479,6 +677,12 @@ export function usePartsPageState(): PartsPageState {
         childId,
         quantity,
       });
+      applyLocalChildLinkUpdate((currentChildren) =>
+        currentChildren.map((child) =>
+          child.id === childId ? { ...child, quantity } : child,
+        ),
+      );
+
       await onRefreshSelected();
     } catch (error) {
       const message = getErrorMessage(error);
@@ -499,6 +703,10 @@ export function usePartsPageState(): PartsPageState {
 
     try {
       await deleteBomLink(selectedPartId, childId);
+      applyLocalChildLinkUpdate((currentChildren) =>
+        currentChildren.filter((child) => child.id !== childId),
+      );
+
       await onRefreshSelected();
     } catch (error) {
       const message = getErrorMessage(error);

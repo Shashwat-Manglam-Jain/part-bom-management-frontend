@@ -3,6 +3,7 @@ import type {
   AuditLog,
   BomTreeResponse,
   PartDetails,
+  PartRecord,
   PartSummary,
 } from '../types/partBom';
 
@@ -33,7 +34,7 @@ export async function getPartDetails(partId: string): Promise<PartDetails> {
 }
 
 export async function createPart(payload: CreatePartPayload) {
-  return request<PartDetails>('/parts', {
+  return request<PartRecord>('/parts', {
     method: 'POST',
     body: JSON.stringify(payload),
   });
