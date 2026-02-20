@@ -234,6 +234,22 @@ export function usePartsPageState(): PartsPageState {
     };
   }, []);
 
+  const refreshCatalogSilently = useCallback(async () => {
+    try {
+      const latestAllParts = await searchParts('');
+      setAllParts(latestAllParts);
+
+      if (searchInput.trim()) {
+        const latestSearchResults = await searchParts(searchInput);
+        applySearchResults(latestSearchResults);
+      } else {
+        applySearchResults(latestAllParts);
+      }
+    } catch {
+      // Keep current list state when silent refresh fails.
+    }
+  }, [applySearchResults, searchInput]);
+
   useEffect(() => {
     if (!selectedPartId) {
       setPartDetails(null);
@@ -595,13 +611,36 @@ export function usePartsPageState(): PartsPageState {
   }, [selectedPartId, onRefreshSelected, createPartLoading, bomMutationLoading]);
 
   useEffect(() => {
-    if (!selectedPartId) {
-      return;
-    }
+    const intervalId = window.setInterval(() => {
+      if (
+        document.visibilityState !== 'visible' ||
+        searchLoading ||
+        createPartLoading ||
+        bomMutationLoading
+      ) {
+        return;
+      }
 
+      void refreshCatalogSilently();
+    }, 7000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [
+    refreshCatalogSilently,
+    searchLoading,
+    createPartLoading,
+    bomMutationLoading,
+  ]);
+
+  useEffect(() => {
     const refreshOnFocus = () => {
       if (document.visibilityState === 'visible') {
-        void onRefreshSelected({ silent: true });
+        void refreshCatalogSilently();
+        if (selectedPartIdRef.current) {
+          void onRefreshSelected({ silent: true });
+        }
       }
     };
 
@@ -612,7 +651,7 @@ export function usePartsPageState(): PartsPageState {
       window.removeEventListener('focus', refreshOnFocus);
       document.removeEventListener('visibilitychange', refreshOnFocus);
     };
-  }, [selectedPartId, onRefreshSelected]);
+  }, [onRefreshSelected, refreshCatalogSilently]);
 
   const onCreateBomLink = async (childId: string, quantity: number) => {
     if (!selectedPartId) {
