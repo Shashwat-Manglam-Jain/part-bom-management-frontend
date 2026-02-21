@@ -19,7 +19,7 @@ import { getErrorMessage } from '../../../shared/utils/errors';
 import type { UiBomNode } from '../types';
 import { mergeBomNodes, normalizeBomTree } from '../utils/bomTree';
 
-const FULL_BOM_DEPTH = 'all' as const;
+const INITIAL_BOM_DEPTH = 1;
 
 interface SearchState {
   input: string;
@@ -277,7 +277,7 @@ export function usePartsPageState(): PartsPageState {
       const [detailsResult, auditResult, bomResult] = await Promise.allSettled([
         getPartDetails(selectedPartId),
         getPartAuditLogs(selectedPartId),
-        getBomTree(selectedPartId, FULL_BOM_DEPTH),
+        getBomTree(selectedPartId, INITIAL_BOM_DEPTH),
       ]);
 
       if (ignoreResponse) {
@@ -301,7 +301,7 @@ export function usePartsPageState(): PartsPageState {
       setAuditLoading(false);
 
       if (bomResult.status === 'fulfilled') {
-        const nodes = normalizeBomTree(bomResult.value.tree, FULL_BOM_DEPTH);
+        const nodes = normalizeBomTree(bomResult.value.tree, INITIAL_BOM_DEPTH);
         setBomRootId(bomResult.value.tree.part.id);
         setBomNodes(nodes);
         setExpandedNodeIds(new Set([bomResult.value.tree.part.id]));
@@ -498,7 +498,7 @@ export function usePartsPageState(): PartsPageState {
     const [detailsResult, auditResult, bomResult] = await Promise.allSettled([
       getPartDetails(currentSelectedPartId),
       getPartAuditLogs(currentSelectedPartId),
-      getBomTree(currentSelectedPartId, FULL_BOM_DEPTH),
+      getBomTree(currentSelectedPartId, INITIAL_BOM_DEPTH),
     ]);
 
     if (selectedPartIdRef.current !== currentSelectedPartId) {
@@ -545,7 +545,7 @@ export function usePartsPageState(): PartsPageState {
       const nextRootId = bomResult.value.tree.part.id;
       const incomingNodes = normalizeBomTree(
         bomResult.value.tree,
-        FULL_BOM_DEPTH,
+        INITIAL_BOM_DEPTH,
       );
 
       setBomRootId(nextRootId);
