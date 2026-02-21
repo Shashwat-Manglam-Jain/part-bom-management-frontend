@@ -21,7 +21,7 @@ React frontend for managing parts, BOM relationships, and audit history.
 - Node.js 18+ (recommended)
 - pnpm
 - Backend API running (default: `http://localhost:3000`)
-- Backend now persists data in SQLite, so created records remain after restart.
+- Backend now uses PostgreSQL via Prisma.
 
 ## Run locally
 
@@ -40,10 +40,9 @@ pnpm run dev
 
 ## Environment variable
 - `VITE_API_BASE_URL` (optional)
-  - Default: `http://localhost:3000`
+  - Local default: `http://localhost:3000`
+  - Non-local fallback (when env is not set): same-origin API routes
   - Used by `src/shared/api/httpClient.ts`
-  - For Vercel frontend deployment, set it to:
-    - `https://part-bom-management-backend.vercel.app`
 
 ## Available scripts
 - `pnpm run dev` - start Vite dev server

@@ -46,7 +46,7 @@ export async function getPartAuditLogs(partId: string): Promise<AuditLog[]> {
 
 export async function getBomTree(
   rootPartId: string,
-  depth = 1,
+  depth: number | 'all' = 1,
   nodeLimit?: number,
 ): Promise<BomTreeResponse> {
   const params = new URLSearchParams({ depth: String(depth) });

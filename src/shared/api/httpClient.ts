@@ -6,12 +6,16 @@ function resolveApiBaseUrl(): string {
 
   if (typeof window !== 'undefined') {
     const { hostname } = window.location;
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    if (
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname === '0.0.0.0'
+    ) {
       return 'http://localhost:3000';
     }
 
-    // Fallback for deployed frontend when env var is missing.
-    return 'https://part-bom-management-backend.vercel.app';
+    // In non-local environments, default to same-origin API routes.
+    return '';
   }
 
   return 'http://localhost:3000';
@@ -61,8 +65,9 @@ export async function request<T>(
       cache: options.cache ?? 'no-cache',
     });
   } catch {
+    const target = API_BASE_URL || 'same-origin';
     throw new Error(
-      `Unable to reach API at ${API_BASE_URL}. Check backend deployment and VITE_API_BASE_URL.`,
+      `Unable to reach API at ${target}. Check backend deployment and VITE_API_BASE_URL.`,
     );
   }
 

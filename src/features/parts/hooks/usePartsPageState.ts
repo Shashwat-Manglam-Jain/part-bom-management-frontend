@@ -19,6 +19,8 @@ import { getErrorMessage } from '../../../shared/utils/errors';
 import type { UiBomNode } from '../types';
 import { mergeBomNodes, normalizeBomTree } from '../utils/bomTree';
 
+const FULL_BOM_DEPTH = 'all' as const;
+
 interface SearchState {
   input: string;
   loading: boolean;
@@ -275,7 +277,7 @@ export function usePartsPageState(): PartsPageState {
       const [detailsResult, auditResult, bomResult] = await Promise.allSettled([
         getPartDetails(selectedPartId),
         getPartAuditLogs(selectedPartId),
-        getBomTree(selectedPartId, 2),
+        getBomTree(selectedPartId, FULL_BOM_DEPTH),
       ]);
 
       if (ignoreResponse) {
@@ -299,7 +301,7 @@ export function usePartsPageState(): PartsPageState {
       setAuditLoading(false);
 
       if (bomResult.status === 'fulfilled') {
-        const nodes = normalizeBomTree(bomResult.value.tree, 2);
+        const nodes = normalizeBomTree(bomResult.value.tree, FULL_BOM_DEPTH);
         setBomRootId(bomResult.value.tree.part.id);
         setBomNodes(nodes);
         setExpandedNodeIds(new Set([bomResult.value.tree.part.id]));
@@ -496,7 +498,7 @@ export function usePartsPageState(): PartsPageState {
     const [detailsResult, auditResult, bomResult] = await Promise.allSettled([
       getPartDetails(currentSelectedPartId),
       getPartAuditLogs(currentSelectedPartId),
-      getBomTree(currentSelectedPartId, 2),
+      getBomTree(currentSelectedPartId, FULL_BOM_DEPTH),
     ]);
 
     if (selectedPartIdRef.current !== currentSelectedPartId) {
@@ -541,12 +543,20 @@ export function usePartsPageState(): PartsPageState {
 
     if (bomResult.status === 'fulfilled') {
       const nextRootId = bomResult.value.tree.part.id;
-      const incomingNodes = normalizeBomTree(bomResult.value.tree, 2);
+      const incomingNodes = normalizeBomTree(
+        bomResult.value.tree,
+        FULL_BOM_DEPTH,
+      );
 
       setBomRootId(nextRootId);
-      setBomNodes((current) => mergeBomNodes(current, incomingNodes));
+      setBomNodes(incomingNodes);
       setExpandedNodeIds((current) => {
-        const next = new Set(current);
+        const next = new Set<string>();
+        for (const nodeId of current) {
+          if (incomingNodes[nodeId]) {
+            next.add(nodeId);
+          }
+        }
         next.add(nextRootId);
         return next;
       });

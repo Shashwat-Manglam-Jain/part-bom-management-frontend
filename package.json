@@ -7,16 +7,15 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:frontend": "tsc -p tsconfig.test.json && node -e \"const fs=require('fs');fs.mkdirSync('.test-dist',{recursive:true});fs.writeFileSync('.test-dist/package.json', '{\\\"type\\\":\\\"commonjs\\\"}');\" && node --test .test-dist/test/frontend/*.test.js"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^7.3.8",
-    "@mui/styled-engine-sc": "^7.3.8",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "styled-components": "^6.3.10",
     "yup": "^1.7.1"
   },
   "devDependencies": {

@@ -3,10 +3,12 @@ import type { UiBomNode } from '../types';
 
 export function normalizeBomTree(
   node: BomTreeNode,
-  requestedDepth: number,
+  requestedDepth: number | 'all',
   currentDepth = 0,
   target: Record<string, UiBomNode> = {},
 ): Record<string, UiBomNode> {
+  const depthLimit =
+    requestedDepth === 'all' ? Number.MAX_SAFE_INTEGER : requestedDepth;
   const childIds = node.children.map((child) => child.part.id);
 
   target[node.part.id] = {
@@ -14,7 +16,7 @@ export function normalizeBomTree(
     quantityFromParent: node.quantityFromParent,
     hasChildren: node.hasChildren,
     childIds,
-    childrenLoaded: !node.hasChildren || currentDepth < requestedDepth,
+    childrenLoaded: !node.hasChildren || currentDepth < depthLimit,
     loadingChildren: false,
   };
 

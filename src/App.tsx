@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { lazy, Suspense, useMemo } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -10,8 +10,14 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { ThemeProvider, alpha } from '@mui/material/styles';
 import { createAppTheme } from './app/theme';
-import { PartsPage } from './features/parts/PartsPage';
 import { ReactNodeIcon } from './shared/ui/ReactGlyphs';
+
+const PartsPage = lazy(async () => {
+  const module = await import('./features/parts/PartsPage');
+  return {
+    default: module.PartsPage,
+  };
+});
 
 function App() {
   const appTheme = useMemo(() => createAppTheme(), []);
@@ -106,7 +112,15 @@ function App() {
         </AppBar>
 
         <Box sx={{ mt: 1.4, flex: 1, minHeight: 0, display: 'flex', overflow: { lg: 'hidden' } }}>
-          <PartsPage />
+          <Suspense
+            fallback={(
+              <Box sx={{ p: 2, color: 'text.secondary' }}>
+                <Typography variant="body2">Loading workspace...</Typography>
+              </Box>
+            )}
+          >
+            <PartsPage />
+          </Suspense>
         </Box>
       </Paper>
     </ThemeProvider>
